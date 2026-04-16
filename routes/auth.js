@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { register, login, createAdmin, updateUser, deleteUser, changePassword} = require("../controllers/authController");
+const { register, login, changePassword} = require("../controllers/authController");
 const { verifyToken, checkRole } = require("../middlewares/authMiddleware");
 const User = require("../models/user");
 
@@ -8,10 +8,6 @@ const User = require("../models/user");
 router.post("/register", register);
 router.post("/login", login);
 
-// admin
-router.post("/create-admin", verifyToken, checkRole("admin"), createAdmin );
-router.put("/users/:id", verifyToken, checkRole("admin"), updateUser);
-router.delete("/users/:id", verifyToken, checkRole("admin"), deleteUser);
 router.put("/change-password", verifyToken, changePassword);
 
 router.get("/admin", verifyToken, checkRole("admin"), (req, res) => {
@@ -43,5 +39,6 @@ router.get("/users", verifyToken, checkRole("admin"), async (req, res) => {
 
   res.json(users);
 });
+
 
 module.exports = router;

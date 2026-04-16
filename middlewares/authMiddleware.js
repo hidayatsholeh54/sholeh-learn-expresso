@@ -7,12 +7,14 @@ exports.verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        if (!authHeader?.startsWith("Bearer ")) {
         return res.status(401).json({ message: "Format token salah" });
         }
 
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log("decoded haha", decoded);
+        console.log("Kunci rahasia saya:", process.env.JWT_SECRET);
         const user = await User.findByPk(decoded.id);
 
         if (!user) {

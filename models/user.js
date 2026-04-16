@@ -12,9 +12,9 @@ const User = sequelize.define("User", {
         allowNull: false,
     },
     role: {
-    type: DataTypes.STRING,
-    defaultValue: "user",
-}
+        type: DataTypes.STRING,
+        defaultValue: "user",
+    }
 });
 
 module.exports = User;
