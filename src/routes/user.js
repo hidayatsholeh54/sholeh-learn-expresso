@@ -6,7 +6,7 @@ const User = require("../models/user");
 
 // admin
 router.post("/create-admin", verifyToken, checkRole("admin"), createAdmin );
-router.put("/users/:id", verifyToken, checkRole("admin"), updateUser);
-router.delete("/users/:id", verifyToken, checkRole("admin"), deleteUser);
+router.delete("/:id", verifyToken, checkRole("admin"), deleteUser);
+router.put("/:id", verifyToken, checkRole("admin"), updateUser);
 
 module.exports = router;
