@@ -1,8 +1,8 @@
-const bcrypt = require("bcrypt");
-const validator = require("validator");
-const userRepository = require("../repositories/userRepository");
+import bcrypt from "bcrypt";
+import validator from "validator";
+import { findByEmail, create, findById, deleteUser as repoDeleteUserr, getAllUsers } from "../repositories/userRepository.js";
 
-exports.createAdmin = async (email, password) => {
+export const createAdmin = async (email, password) => {
   if (!email || !password) {
     throw new Error("Email dan Password wajib!");
   }
@@ -15,7 +15,7 @@ exports.createAdmin = async (email, password) => {
     throw new Error("Password minimal 6 karakter");
   }
 
-  const existingUser = await userRepository.findByEmail(email);
+  const existingUser = await findByEmail(email);
 
   if (existingUser) {
     throw new Error("User sudah ada!");
@@ -23,7 +23,7 @@ exports.createAdmin = async (email, password) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const admin = await userRepository.create({
+  const admin = await create({
     email,
     password: hashedPassword,
     role: "admin",
@@ -36,8 +36,8 @@ exports.createAdmin = async (email, password) => {
   };
 };
 
-exports.updateUser = async (id, data) => {
-  const user = await userRepository.findById(id);
+export const updateUser = async (id, data) => {
+  const user = await findById(id);
 
   if (!user) {
     throw new Error("User tidak ditemukan");
@@ -63,22 +63,22 @@ exports.updateUser = async (id, data) => {
   };
 };
 
-exports.deleteUser = async (id, currentUser) => {
+export const deleteUser = async (id, currentUser) => {
   if (currentUser.id === id) {
     throw new Error("Tidak bisa hapus diri sendiri");
   }
 
-  const user = await userRepository.findById(id);
+  const user = await findById(id);
 
   if (!user) {
     throw new Error("User tidak ditemukan");
   }
 
-  await userRepository.delete(user);
+  await repoDeleteUserr(user);
 
   return { message: "User berhasil dihapus" };
 };
 
-exports.getUsers = async () => {
-  return await userRepository.getAllUsers();
+export const getUsers = async () => {
+  return await getAllUsers();
 };

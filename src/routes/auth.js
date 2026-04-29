@@ -1,16 +1,16 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-const {
-  register,
-  login,
-  changePassword,
-  getProfile,
-  getMe,
-  getUsers
-} = require("../controllers/authController");
+import { 
+  register, 
+  login, 
+  changePassword, 
+  getProfile, 
+  getMe, 
+  getUsers 
+} from "../controllers/authController.js";
 
-const { verifyToken, checkRole } = require("../middlewares/authMiddleware");
+import { verifyToken, checkRole } from "../middlewares/authMiddleware.js";
 
 // public route
 router.post("/register", register);
@@ -31,4 +31,4 @@ router.get("/admin", verifyToken, checkRole("admin"), (req, res) => {
 
 router.get("/users", verifyToken, checkRole("admin"), getUsers);
 
-module.exports = router;
+export default router;

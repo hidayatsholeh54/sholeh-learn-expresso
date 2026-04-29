@@ -1,10 +1,10 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const userService = require("../services/userService");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import * as userService from "../services/userService.js";
+import User from "../models/User.js";
 
 // register
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     let email = req.body.email?.trim().toLowerCase();
     let password = req.body.password?.trim();
@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
 };
 
 // login
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     let email = req.body.email?.trim().toLowerCase();
     let password = req.body.password?.trim();
@@ -96,7 +96,7 @@ exports.login = async (req, res) => {
 };
 
 // change password
-exports.changePassword = async (req, res) => {
+export const changePassword = async (req, res) => {
   try {
     let oldPassword = req.body.oldPassword?.trim();
     let newPassword = req.body.newPassword?.trim();
@@ -143,14 +143,14 @@ exports.changePassword = async (req, res) => {
 };
 
 
-exports.getProfile = (req, res) => {
+export const getProfile = (req, res) => {
   res.json({
     message: "Berhasil akses profile",
     user: req.user,
   });
 };
 
-exports.getMe = (req, res) => {
+export const getMe = (req, res) => {
   res.json({
     message: "Berhasil ambil data user",
     user: {
@@ -162,7 +162,7 @@ exports.getMe = (req, res) => {
 };
 
 // get user admin
-exports.getUsers = async (req, res) => {
+export const getUsers = async (req, res) => {
   try {
     const users = await userService.getUsers();
 

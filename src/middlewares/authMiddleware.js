@@ -1,9 +1,9 @@
 // catatan : kalau 401 itu urusannya sama Authentication (proses ngenalin siapa kamu),
 //  sedangkan 403 itu urusannya sama Authorization (proses nentuin kamu boleh ngapain aja).
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-exports.verifyToken = async (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
@@ -32,7 +32,7 @@ exports.verifyToken = async (req, res, next) => {
     }
 }
 
-exports.checkRole = (role) => {
+export const checkRole = (role) => {
   return (req, res, next) => {
     if (req.user.role !== role) {
       // User dikenal, tapi dilarang akses rute ini?

@@ -1,8 +1,8 @@
-require("dotenv").config();
-const express = require("express");
-const sequelize = require("./config/db");
-const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/user");
+import 'dotenv/config';
+import express from "express";
+import sequelize from './config/db.js';
+import authRoutes from './routes/auth.js'
+import userRoutes from './routes/user.js'
 
 const app = express();
 

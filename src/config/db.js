@@ -1,4 +1,4 @@
-const { Sequelize } = require("sequelize");
+import { Sequelize } from "sequelize";
 
 const sequelize = new Sequelize(
     process.env.DB_NAME,
@@ -7,7 +7,13 @@ const sequelize = new Sequelize(
     {
         host: "localhost",
         dialect: "postgres",
+        pool: {
+        max: 5,     // max koneksi
+        min: 0,
+        acquire: 30000, // waiting time for connection 30second
+        idle: 10000 // idle time 10second
+        },
     }
 );
 
-module.exports = sequelize
+export default sequelize;

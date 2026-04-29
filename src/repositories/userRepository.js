@@ -1,22 +1,22 @@
-const User = require("../models/user");
+import User from "../models/user.js";
 
-exports.findByEmail = async (email) => {
+export const findByEmail = async (email) => {
   return await User.findOne({ where: { email } });
 };
 
-exports.findById = async (id) => {
+export const findById = async (id) => {
   return await User.findByPk(id);
 };
 
-exports.create = async (data) => {
+export const create = async (data) => {
   return await User.create(data);
 };
 
-exports.delete = async (user) => {
+export const deleteUser = async (user) => {
   return await user.destroy();
 };
 
-exports.getAllUsers = async () => {
+export const getAllUsers = async () => {
   return await User.findAll({
     attributes: ["id", "email", "role"],
   });

@@ -1,9 +1,9 @@
-const bcrypt = require("bcrypt");
-const User = require("../models/user");
-const userService = require("../services/userService");
+import bcrypt from "bcrypt";
+import User from "../models/user.js";
+import * as userService from "../services/userService.js";
 
 // create admin
-exports.createAdmin = async (req, res) => {
+export const createAdmin = async (req, res) => {
   try {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password?.trim();
@@ -20,7 +20,7 @@ exports.createAdmin = async (req, res) => {
 };
 
 // update user
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
     const id = Number(req.params.id);
 
@@ -43,7 +43,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // delete user
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
   try {
     const id = Number(req.params.id);
 

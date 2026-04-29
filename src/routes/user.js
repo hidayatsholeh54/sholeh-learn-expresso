@@ -1,12 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { createAdmin, updateUser, deleteUser } = require("../controllers/userController");
-const { verifyToken, checkRole } = require("../middlewares/authMiddleware")
-const User = require("../models/user");
+import {createAdmin, updateUser, deleteUser} from "../controllers/userController.js";
+import { verifyToken, checkRole } from "../middlewares/authMiddleware.js";
+import User from "../models/user.js";
 
 // admin
 router.post("/create-admin", verifyToken, checkRole("admin"), createAdmin );
 router.delete("/:id", verifyToken, checkRole("admin"), deleteUser);
 router.put("/:id", verifyToken, checkRole("admin"), updateUser);
 
-module.exports = router;
+export default router;
