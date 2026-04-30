@@ -2,25 +2,36 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import * as userService from "../services/userService.js";
 import User from "../models/User.js";
+import logger from "../config/logger.js";
 
 // register
 export const register = async (req, res) => {
+  const email = req.body.email?.trim().toLowerCase() || null;
+  const password = req.body.password?.trim() || null;
+
   try {
-    let email = req.body.email?.trim().toLowerCase();
-    let password = req.body.password?.trim();
+    logger.info({
+      correlation_id: req.correlationId,
+      message: "REGISTER request",
+      method: req.method,
+      path: req.originalUrl,
+      email,
+    });
 
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Email & password wajib",
-      });
+      return res.status(400).json({ message: "Email & password wajib" });
     }
 
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
-      return res.status(400).json({
-        message: "User sudah ada",
+      logger.warn({
+        correlation_id: req.correlationId,
+        message: "REGISTER failed - user exists",
+        email,
       });
+
+      return res.status(400).json({ message: "User sudah ada" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,7 +42,13 @@ export const register = async (req, res) => {
       role: "user",
     });
 
-    res.json({
+    logger.info({
+      correlation_id: req.correlationId,
+      message: "REGISTER success",
+      userId: user.id,
+    });
+
+    res.status(201).json({
       message: "Register berhasil",
       user: {
         id: user.id,
@@ -40,46 +57,70 @@ export const register = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    logger.error({
+      correlation_id: req.correlationId,
+      message: "REGISTER error",
+      error: err.message,
+      email,
+    });
+
+    return res.status(500).json({ error: "internal server error" });
   }
 };
 
 // login
 export const login = async (req, res) => {
+  const email = req.body.email?.trim().toLowerCase() || null;
+  const password = req.body.password?.trim() || null;
+
   try {
-    let email = req.body.email?.trim().toLowerCase();
-    let password = req.body.password?.trim();
+    logger.info({
+      correlation_id: req.correlationId,
+      message: "LOGIN attempt",
+      method: req.method,
+      path: req.originalUrl,
+      email,
+    });
 
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Email & password wajib",
-      });
+      return res.status(400).json({ message: "Email & password wajib" });
     }
 
     const user = await User.findOne({ where: { email } });
 
     if (!user) {
-      return res.status(404).json({
-        message: "User tidak ditemukan",
+      logger.warn({
+        correlation_id: req.correlationId,
+        message: "LOGIN failed - user not found",
+        email,
       });
+
+      return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
-      return res.status(400).json({
-        message: "Password salah",
+      logger.warn({
+        correlation_id: req.correlationId,
+        message: "LOGIN failed - wrong password",
+        userId: user.id,
       });
+
+      return res.status(400).json({ message: "Password salah" });
     }
 
     const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-      },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
+
+    logger.info({
+      correlation_id: req.correlationId,
+      message: "LOGIN success",
+      userId: user.id,
+    });
 
     res.json({
       message: "Login berhasil",
@@ -91,6 +132,13 @@ export const login = async (req, res) => {
       },
     });
   } catch (err) {
+    logger.error({
+      correlation_id: req.correlationId,
+      message: "LOGIN error",
+      error: err.message,
+      email,
+    });
+
     res.status(500).json({ error: err.message });
   }
 };
@@ -98,6 +146,12 @@ export const login = async (req, res) => {
 // change password
 export const changePassword = async (req, res) => {
   try {
+    logger.info({
+      correlation_id: req.correlationId,
+      message: "CHANGE PASSWORD request",
+      userId: req.user.id,
+    });
+
     let oldPassword = req.body.oldPassword?.trim();
     let newPassword = req.body.newPassword?.trim();
 
@@ -116,17 +170,19 @@ export const changePassword = async (req, res) => {
     const user = await User.findByPk(req.user.id);
 
     if (!user) {
-      return res.status(404).json({
-        message: "User tidak ditemukan",
-      });
+      return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({
-        message: "Password lama salah",
+      logger.warn({
+        correlation_id: req.correlationId,
+        message: "CHANGE PASSWORD failed - wrong old password",
+        userId: user.id,
       });
+
+      return res.status(400).json({ message: "Password lama salah" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -134,16 +190,32 @@ export const changePassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    res.json({
-      message: "Password berhasil diubah",
+    logger.info({
+      correlation_id: req.correlationId,
+      message: "CHANGE PASSWORD success",
+      userId: user.id,
     });
+
+    res.json({ message: "Password berhasil diubah" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    logger.error({
+      correlation_id: req.correlationId,
+      message: "CHANGE PASSWORD failed",
+      error: err.message,
+      userId: req.user?.id,
+    });
+
+    res.status(500).json({ error: "internal server error" });
   }
 };
 
 
 export const getProfile = (req, res) => {
+  logger.info({
+    correlation_id: req.correlationId,
+    message: "GET PROFILE",
+    userId: req.user.id,
+  });
   res.json({
     message: "Berhasil akses profile",
     user: req.user,
@@ -151,6 +223,11 @@ export const getProfile = (req, res) => {
 };
 
 export const getMe = (req, res) => {
+  logger.info({
+    correlation_id: req.correlationId,
+    message: "GET ME",
+    userId: req.user.id,
+  });
   res.json({
     message: "Berhasil ambil data user",
     user: {
@@ -164,10 +241,22 @@ export const getMe = (req, res) => {
 // get user admin
 export const getUsers = async (req, res) => {
   try {
+    logger.info({
+      correlation_id: req.correlationId,
+      message: "GET USERS",
+      byUser: req.user.id,
+    });
     const users = await userService.getUsers();
 
     res.json(users);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    logger.error({
+      correlation_id: req.correlationId,
+      message: "GET USERS error",
+      error: err.message,
+      byUser: req.user?.id,
+    });
+
+    res.status(500).json({ message: "internal server error" });
   }
 };
