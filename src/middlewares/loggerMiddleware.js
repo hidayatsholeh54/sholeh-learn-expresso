@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
+import { Xid } from 'xid-ts';
 import logger from '../config/logger.js';
 
 export const addCorrelationId = (req, res, next) => {
-    req.correlationId = randomUUID();
+    req.correlationId = new Xid().toString();
     next();
 }
 
